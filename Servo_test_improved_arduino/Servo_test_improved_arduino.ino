@@ -1,8 +1,8 @@
-#include <Servo.h> 
+#include <Servo.h>
 
-byte currentValue = 5;
+byte currentValue = 0;
 byte values[6];
-Servo servo[6];   
+Servo servo[6];
 
 void setup() {
   Serial.begin(115200);
@@ -10,29 +10,33 @@ void setup() {
 }
 
 void loop() {
-  if(Serial.available() > 0){
+  if (Serial.available() > 0) {
     digitalWrite(13, HIGH);
     values[currentValue] = Serial.read();
-    if (values[currentValue] != 255 ) 
-    {
-      if (servo[currentValue].attached() == LOW)  servo[currentValue].attach(14+currentValue);
-      servo[currentValue].write(values[currentValue]);
-    }
-    else {
-      if (servo[currentValue].attached() == HIGH)  servo[currentValue].detach();
-    }
-     currentValue++;
-    if(currentValue > 5){
+    currentValue++;
+    if (currentValue > 5) {
       currentValue = 0;
-      Serial.write('A');
+      for (byte i = 0; i <= 5; i++) {
+        if (values[i] != 255 )
+        {
+          if (servo[i].attached() == LOW)  servo[i].attach(14 + i);
+          servo[i].write(values[i]);
+        }
+        else {
+          if (servo[i].attached() == HIGH)  servo[i].detach();
+        }
+        Serial.print(values[i]);
+        Serial.print(',');
+      }
+      Serial.println();
     }
-     
+
   }
 }
 
 void establishContact() {
   while (Serial.available() <= 0) {
-    Serial.write('A');   // send an initial string
+    Serial.println();   // send an initial string
     delay(300);
   }
 }

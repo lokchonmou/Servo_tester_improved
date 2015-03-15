@@ -14,13 +14,14 @@ boolean firstContact = false;
 boolean selected_port = false;
 
 void setup() {
-  size(displayWidth/3, displayHeight*2/3); 
-  background(230, 230, 230); 
+  size(320, 200);
+  background(230, 230, 230);
   fill(0);
-  text("Choose the serial port from the list and then click anywhere to continue", 10, height/2); // display text to user
-  
+  textAlign(CENTER, CENTER);
+  text("Choose the serial port from the list \n and then click anywhere to continue", width/2, height/2); // display text to user
+
   int port_list_length = Serial.list().length;
-  
+
   if (port_list_length==0) {
     println("There are no serial available.");
     exit();
@@ -31,27 +32,19 @@ void setup() {
     }
 
     add(guiChoice); //Place the Choice selection box on the display area.
-
-    textAlign(CENTER, CENTER);
+    frame.setResizable(true);
   }
 }
 
 void draw() {
-  if (selected_port == false) {
-    if (mousePressed)
-    {
-      println(guiChoice.getSelectedItem()); // print selection
-//      myPort= new Serial(this, guiChoice.getSelectedItem(), 115200);
-      remove(guiChoice); // remove drop-down list, otherwise it appears on top of the video feed
-      selected_port= true; 
-    }
-  } else {
+  if (selected_port == true) {
+
+    frame.setSize(displayWidth/3, displayHeight*2/3); 
 
     background(230, 230, 230); 
     text("Servo Tester Ver1.1", width/2, 40);
-    text("by AO IEONG KIN KEI & LOK CHON MOU", width/2,height-40);
+    text("by AO IEONG KIN KEI & LOK CHON MOU", width/2, height-40);
     for (byte i = 0; i <= 5; i++) {  
-
       colorMode(RGB, 255);
       rectMode(CENTER);
       fill(255);
@@ -73,15 +66,9 @@ void draw() {
 
 void serialEvent(Serial myPort) {
   //  println("I received");
-  int inByte = myPort.read();
-  if (firstContact == false) {
-    if (inByte == 'A') { 
-      println("I received");
-      myPort.clear();          // clear the serial port buffer
-      firstContact = true;     // you've had first contact from the microcontroller
-      myPort.write('A');       // ask for more
-    }
-  } else {
+  String myString = myPort.readStringUntil('\n');
+  if (myString != null) {
+    println(myString);
     //    println("sending");
     for (byte i = 0; i <= 5; i++)
       if (inControl[i] == 1)
@@ -103,7 +90,13 @@ void mouseWheel(MouseEvent event) {
 }
 
 void mouseClicked() {
-  if (selected_port == true) {
+
+  if (selected_port == false) {
+    println(guiChoice.getSelectedItem()); // print selection
+    myPort= new Serial(this, guiChoice.getSelectedItem(), 115200);
+    remove(guiChoice); // remove drop-down list, otherwise it appears on top of the video feed
+    selected_port= true;
+  } else {
     for (byte i = 0; i <= 5; i++) {  
       if (mouseX >= width*(i+1)/7 - 25 && mouseX <= width*(i+1)/7 + 25) {
         if (inControl[i] == 0) inControl[i] = 1;
